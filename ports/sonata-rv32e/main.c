@@ -1,5 +1,9 @@
+
+#include "py/compile.h"
 #include "py/runtime.h"
+#include "py/repl.h"
 #include "py/gc.h"
+#include "shared/runtime/pyexec.h"
 
 /* _estack to be defined and exported from the linker script */
 extern uint32_t _estack; 
@@ -39,6 +43,8 @@ int main(int argc, char **argv)
     gc_init(heap, heap + sizeof(heap));
     #endif
     mp_init();
+
+    pyexec_friendly_repl();
 
     __asm__ volatile( "mv t2, s0\n\t"
                       "mv %[o_reg], t2\n\t"

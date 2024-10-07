@@ -32,12 +32,14 @@ INC += -I$(HOME)/work/cap-vm/cheriot/riscv-experiment/sonata-rv32e/src/include
 CHERIOT_RTOS_INCLUDE_PATH ?= $(HOME)/work/cap-vm/cheriot/cheriot-rtos/sdk/include
 CHERIOT_SDK_INCLUDES = $(foreach dir, c++-config libc++ platform/generic-riscv, -I$(CHERIOT_RTOS_INCLUDE_PATH)/$(dir))
 INC += $(CHERIOT_SDK_INCLUDES)
+
 ###################
 #####################
 
 DFU = $(TOP)/tools/dfu.py
 PYDFU = $(TOP)/tools/pydfu.py
-CFLAGS_RV32E = -march=rv32em_zicsr_zifencei -mabi=ilp32e -fsingle-precision-constant -Wdouble-promotion -Wfloat-conversion
+#CFLAGS_RV32E = -march=rv32em_zicsr_zifencei -mabi=ilp32e -fsingle-precision-constant -Wdouble-promotion -Wfloat-conversion
+CFLAGS_RV32E = -march=rv32em_zicsr_zifencei -mabi=ilp32e -Wdouble-promotion -Wfloat-conversion
 CFLAGS += $(INC) -Wall -Werror -std=c99 -nostdlib $(CFLAGS_RV32E) $(COPT)
 LDFLAGS += -nostdlib -T rv32e-upy.ld -Map=$@.map --cref --gc-sections
 
@@ -62,6 +64,8 @@ LIBS = -L$(CROSS_GCC_INSTALL)/lib/gcc/riscv32-unknown-elf/$(CROSS_GCC_VERSION) -
 SRC_S = crt_upy.S
 
 SRC_C = main.c                          \
+	shared/runtime/pyexec.c         \
+	shared/readline/readline.c      \
 	shared/runtime/stdout_helpers.c \
 	$(BUILD)/_frozen_mpy.c          \
 

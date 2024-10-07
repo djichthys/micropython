@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include "common/defs.h"
 #include "platform/platform-uart.hh"
 #include "py/mpconfig.h"
 
