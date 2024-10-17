@@ -150,8 +150,11 @@ static int parse_compile_execute(const void *source, mp_parse_input_kind_t input
     }
 
     #if MICROPY_REPL_INFO
+    //mp_uint_t ticks1 = mp_hal_ticks_ms() - start; 
+    //mp_printf(&mp_plat_print, "exec : " UINT_FMT " ms\n\r", ticks1 / mp_hal_cycles_per_ms());
     // display debugging info if wanted
-    if ((exec_flags & EXEC_FLAG_ALLOW_DEBUGGING) && repl_display_debugging_info) {
+    //if ((exec_flags & EXEC_FLAG_ALLOW_DEBUGGING) && repl_display_debugging_info) {
+    if (exec_flags & EXEC_FLAG_ALLOW_DEBUGGING) {
         mp_uint_t ticks = mp_hal_ticks_ms() - start; // TODO implement a function that does this properly
         // mp_printf(&mp_plat_print, "took " UINT_FMT " ms\n", ticks ); DEJICE - revert back
         mp_printf(&mp_plat_print, "took " UINT_FMT " ms\n", ticks / mp_hal_cycles_per_ms());

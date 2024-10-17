@@ -82,7 +82,7 @@ ifeq ($(QEMU_RV32),1)
   LDFLAGS += -nostdlib -T rv32e-upy.ld -Map=$@.map --cref --gc-sections
 else
   LDFLAGS += -nostdlib -T sonatarv32e.ld -Map=$@.map --cref --gc-sections
-  SRC_CXX += led.cpp
+#  SRC_CXX += led.cpp
 endif
 
 SRC_C += shared/libc/string0.c
