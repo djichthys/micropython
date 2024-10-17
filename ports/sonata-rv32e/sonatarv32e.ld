@@ -11,7 +11,7 @@ SEARCH_DIR("/media/data/work/riscv/toolchain-bin/riscv32-unknown-elf/lib");
 
 MEMORY
 {
-  /* qemu-system-risc64 virt machine */
+  /* sonata riscv rv32e machine */
   RAM (rwx)  : ORIGIN = 0x00100000, LENGTH = 256K
 }
 
@@ -20,29 +20,11 @@ SECTIONS
   /* Read-only sections, merged into text segment: */
   PROVIDE (__executable_start = SEGMENT_START("text-segment", 0x10000));
   . = SEGMENT_START("text-segment", 0x10000) + SIZEOF_HEADERS;
-  PROVIDE (__stack_top = ORIGIN(RAM) + LENGTH(RAM));
+  __stack_top = ORIGIN(RAM) + LENGTH(RAM);
+  PROVIDE (_estack = __stack_top); 
+  PROVIDE ( _vectors_start = ORIGIN(RAM) ); 
   _start = ORIGIN(RAM) + 0x1000;
   . = _start;
-  .init _start :
-  {
-    KEEP (*(SORT_NONE(.init)))
-  }
-
-  /* The program code and other data goes into FLASH */
-  .text :
-  {
-    . = ALIGN(4);
-    KEEP(*(.isr_vector)) /* isr vector table */
-    *(.text)           /* .text sections (code) */
-    *(.text*)          /* .text* sections (code) */
-    *(.rodata)         /* .rodata sections (constants, strings, etc.) */
-    *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
-
-    . = ALIGN(4);
-    _etext = .;        /* define a global symbol at end of code */
-    _sidata = _etext;  /* This is used by the startup in order to initialize the .data section */
-  }
-
   .interp         : { *(.interp) }
   .note.gnu.build-id  : { *(.note.gnu.build-id) }
   .hash           : { *(.hash) }
@@ -78,9 +60,11 @@ SECTIONS
       *(.rela.iplt)
       PROVIDE_HIDDEN (__rela_iplt_end = .);
     }
+  .init _start    :
+  {
+    KEEP (*(SORT_NONE(.init)))
+  }
   .plt            : { *(.plt) *(.iplt) }
-
-
   .text           :
   {
     *(.text.unlikely .text.*_unlikely .text.unlikely.*)
@@ -221,12 +205,12 @@ SECTIONS
    . = ALIGN(. != 0 ? 32 / 8 : 1);
   }
   . = ALIGN(32 / 8);
+  _end = .; PROVIDE (end = .);
   . = SEGMENT_START("ldata-segment", .);
   . = ALIGN(32 / 8);
   __BSS_END__ = .;
   __global_pointer$ = MIN(__SDATA_BEGIN__ + 0x800,
 		            MAX(__DATA_BEGIN__ + 0x800, __BSS_END__ - 0x800));
-  _end = .; PROVIDE (end = .);
   . = DATA_SEGMENT_END (.);
   /* Stabs debugging sections.  */
   .stab          0 : { *(.stab) }

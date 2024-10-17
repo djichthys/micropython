@@ -13,8 +13,15 @@ ifeq ($(CROSS_GCC_INSTALL),)
     $(warning provide cross-compiler gcc binary or hardcode within makefile here. CROSS_GCC_INSTALL=<path>)
     CROSS_COMPILE ?= riscv32-unknown-elf-
 endif
-#CROSS_COMPILE ?= $(CROSS_GCC_INSTALL)/bin/riscv32-unknown-elf-
+ifeq ($(CROSS_LLVM_INSTALL),)
+    $(warning provide cross-compiler gcc binary or hardcode within makefile here. CROSS_LLVM_INSTALL=<path>)
+    CROSS_COMPILE ?= riscv32-unknown-elf-
+endif
+
 CROSS_COMPILE ?= $(CROSS_LLVM_INSTALL)/bin/
+ifeq ($(UF2_UTILS),)
+  $(warning provide path to UF2 utilities or hardcode within makefile here. UF2_UTILS=<path>)
+endif
 
 #Screen scrape GCC version
 CROSS_GCC_VERSION:=$(shell $(CROSS_GCC_INSTALL)/bin/riscv32-unknown-elf-gcc --version | awk '{if (NR == 1) { print $$3}}')
@@ -38,10 +45,8 @@ INC += $(CHERIOT_SDK_INCLUDES)
 
 DFU = $(TOP)/tools/dfu.py
 PYDFU = $(TOP)/tools/pydfu.py
-#CFLAGS_RV32E = -march=rv32em_zicsr_zifencei -mabi=ilp32e -fsingle-precision-constant -Wdouble-promotion -Wfloat-conversion
 CFLAGS_RV32E = -march=rv32em_zicsr_zifencei -mabi=ilp32e -Wdouble-promotion -Wfloat-conversion
 CFLAGS += $(INC) -Wall -Werror -std=c99 -nostdlib $(CFLAGS_RV32E) $(COPT)
-LDFLAGS += -nostdlib -T rv32e-upy.ld -Map=$@.map --cref --gc-sections
 
 
 
@@ -61,35 +66,34 @@ CXXFLAGS += $(filter-out -std=c99,$(CFLAGS)) -std=c++20
 
 LIBS = -L$(CROSS_GCC_INSTALL)/lib/gcc/riscv32-unknown-elf/$(CROSS_GCC_VERSION) -lgcc
 
-SRC_S = crt_upy.S
+SRC_S = crt_mpy.S
 
 SRC_C = main.c                          \
-	shared/runtime/pyexec.c         \
-	shared/readline/readline.c      \
-	shared/runtime/stdout_helpers.c \
-	$(BUILD)/_frozen_mpy.c          \
+        shared/runtime/pyexec.c         \
+        shared/readline/readline.c      \
+        shared/libc/printf.c            \
+        shared/runtime/stdout_helpers.c \
+        $(BUILD)/_frozen_mpy.c          \
 
-SRC_CXX = uart_core.cpp
-
-BSRC_C = \
-	main.c \
-	uart_core.c \
-	shared/libc/printf.c \
-	shared/readline/readline.c \
-	shared/runtime/pyexec.c \
-	shared/runtime/stdout_helpers.c \
-	$(BUILD)/_frozen_mpy.c \
+SRC_CXX = uart_core.cpp 
+ifeq ($(QEMU_RV32),1)
+  SRC_C += ns16550a.c
+  CFLAGS += -DQEMU_DEBUG
+  LDFLAGS += -nostdlib -T rv32e-upy.ld -Map=$@.map --cref --gc-sections
+else
+  LDFLAGS += -nostdlib -T sonatarv32e.ld -Map=$@.map --cref --gc-sections
+  SRC_CXX += led.cpp
+endif
 
 SRC_C += shared/libc/string0.c
-
 SRC_QSTR += shared/readline/readline.c shared/runtime/pyexec.c
 
 OBJ += $(PY_CORE_O)
 OBJ += $(addprefix $(BUILD)/, $(SRC_S:.S=.o))
-OBJ += $(addprefix $(BUILD)/, $(SRC_C:.c=.o))
 OBJ += $(addprefix $(BUILD)/, $(SRC_CXX:.cpp=.o))
+OBJ += $(addprefix $(BUILD)/, $(SRC_C:.c=.o))
 
-all: $(BUILD)/firmware.elf
+all: $(BUILD)/firmware.elf.uf2
 
 $(BUILD)/_frozen_mpy.c: $(TOP)/tests/frozen/frozentest.mpy $(BUILD)/genhdr/qstrdefs.generated.h
 	$(ECHO) "MISC freezing bytecode"
@@ -101,11 +105,11 @@ $(BUILD)/firmware.elf: $(OBJ)
 	$(Q)$(SIZE) $@
 
 $(BUILD)/firmware.bin: $(BUILD)/firmware.elf
-	$(Q)$(OBJCOPY) -O binary -j .isr_vector -j .text -j .data $^ $(BUILD)/firmware.bin
+	$(Q)$(OBJCOPY) -O binary $^ $@
 
-$(BUILD)/firmware.bin.uf2: $(BUILD)/firmware.bin
+$(BUILD)/firmware.elf.uf2: $(BUILD)/firmware.elf
 	$(ECHO) "Create $@"
-	$(Q)$(PYTHON) $(DFU) -b 0x08000000:$(BUILD)/firmware.bin $@
+	$(Q)$(UF2_UTILS)/utils/uf2conv.py $< -f 0x6CE29E60 -b 0x00000000 -co $@
 
 # Run emulation build on a POSIX system with suitable terminal settings
 run:

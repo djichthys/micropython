@@ -11,7 +11,7 @@ SEARCH_DIR("/media/data/work/riscv/toolchain-bin/riscv32-unknown-elf/lib");
 
 MEMORY
 {
-  /* qemu-system-risc64 virt machine */
+  /* qemu-system-risc32 virt machine */
   RAM (rwx)  : ORIGIN = 0x80000000, LENGTH = 128M
 }
 
@@ -22,6 +22,8 @@ SECTIONS
   . = SEGMENT_START("text-segment", 0x10000) + SIZEOF_HEADERS;
   __stack_top = ORIGIN(RAM) + LENGTH(RAM);
   PROVIDE (_estack = __stack_top); 
+  _start = ORIGIN(RAM);
+  . = _start;
   .interp         : { *(.interp) }
   .note.gnu.build-id  : { *(.note.gnu.build-id) }
   .hash           : { *(.hash) }
@@ -57,7 +59,7 @@ SECTIONS
       *(.rela.iplt)
       PROVIDE_HIDDEN (__rela_iplt_end = .);
     }
-  .init           :
+  .init  _start   :
   {
     KEEP (*(SORT_NONE(.init)))
   }

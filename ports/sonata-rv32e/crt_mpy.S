@@ -11,7 +11,7 @@ _start:
   .option pop
   la sp, _estack
   add s0, sp, zero
-  jal zero, upy_start
+  jal zero, mpy_start
   .cfi_endproc
 1:
     wfi

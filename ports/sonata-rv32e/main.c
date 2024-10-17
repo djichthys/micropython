@@ -1,25 +1,37 @@
+#include <stdio.h> 
+#include <stdbool.h>
+#include <string.h> 
 
+#include "py/mpconfig.h"
+#ifdef QEMU_DEBUG
+#include "ns16550a.h"
+#endif 
+
+#include "py/builtin.h"
 #include "py/compile.h"
 #include "py/runtime.h"
 #include "py/repl.h"
 #include "py/gc.h"
+#include "py/mperrno.h"
+#include "py/mphal.h"
 #include "shared/runtime/pyexec.h"
 
-/* _estack to be defined and exported from the linker script */
+#include "common/defs.h"
+#include "common/timer-utils.hh"
+
+/*!
+ * Linker provided symbols to calculate 
+ * locations and offsets in memory 
+ */
+extern void uart_boot();
+extern uint32_t  etext, edata, end; 
 extern uint32_t _estack; 
-static char *argv[] = { "upy_sonata" }; 
+
+
+/* _estack to be defined and exported from the linker script */
+static char *argv[] = { "mpy_sonata" }; 
 static uintptr_t *stack_top;
 static char heap[MICROPY_HEAP_SIZE];
-
-int start_repl(int arg, char **argv)
-{
-    int idx, tval = arg+10;
-    int c = tval;
-    for( idx=0; idx < tval; idx++) { 
-      c = idx + 10; 
-    } 
-    return c; 
-}
 
 #if MICROPY_ENABLE_GC
 void gc_collect(void) {
@@ -33,25 +45,41 @@ void gc_collect(void) {
 }
 #endif
 
+mp_lexer_t *mp_lexer_new_from_file(qstr filename) {
+    mp_raise_OSError(MP_ENOENT);
+}
 
+mp_import_stat_t mp_import_stat(const char *path) {
+    return MP_IMPORT_STAT_NO_EXIST;
+}
 
 int main(int argc, char **argv) 
 {
-    char *myfp = heap;
+    /* Init UART */
+    uart_boot(); 
 
     #if MICROPY_ENABLE_GC 
     gc_init(heap, heap + sizeof(heap));
     #endif
     mp_init();
 
-    pyexec_friendly_repl();
 
-    __asm__ volatile( "mv t2, s0\n\t"
-                      "mv %[o_reg], t2\n\t"
-                      "add %[o_reg], %[o_reg], %[i_reg]\n\t"
-                     : [o_reg] "+r" (myfp)
-                     :     [i_reg] "r" (argc)
-                 : "t2"); 
+    #if MICROPY_ENABLE_COMPILER
+    #if MICROPY_REPL_EVENT_DRIVEN
+    pyexec_event_repl_init();
+    for (;;) {
+        int c = mp_hal_stdin_rx_chr();
+        if (pyexec_event_repl_process_char(c)) {
+            break;
+        }
+    }
+    #else /* !MICROPY_REPL_EVENT_DRIVEN */
+    pyexec_friendly_repl();
+    #endif /* !MICROPY_REPL_EVENT_DRIVEN */
+    #else 
+    #endif /* MICROPY_ENABLE_COMPILER */
+
+    mp_deinit();
     return 0;
 }
 
@@ -64,14 +92,15 @@ void nlr_jump_fail(void *val) {
 
 
 __attribute__((noreturn)) 
-void upy_start()
+void mpy_start()
 {
-  int retval, c = 0; 
+  /* Store stack top for GC */
   stack_top = (uintptr_t *)&_estack;
-  retval = main(sizeof(argv)/sizeof(char *), argv);
-  retval = retval + c; 
-  while(1) {
-    c++;  /* replace with sleep and yield interrupt routine */
+
+  /* Jump to main function */ 
+  main(sizeof(argv)/sizeof(char *), argv);
+  while (true) {
+    __asm__("wfi");   /* Infinite loop */
   }
 }
 

@@ -14,7 +14,9 @@
 #define MICROPY_ENABLE_GC                 (1)
 #define MICROPY_HELPER_REPL               (1)
 #define MICROPY_MODULE_FROZEN_MPY         (1)
+#define MICROPY_REPL_EVENT_DRIVEN         (0)
 #define MICROPY_ENABLE_EXTERNAL_IMPORT    (1)
+#define MICROPY_REPL_INFO                 (1)
 
 #define MICROPY_ALLOC_PATH_MAX            (256)
 
@@ -45,3 +47,4 @@ typedef long mp_off_t;
 #endif
 
 #define MP_STATE_PORT MP_STATE_VM
+//#define MICROPY_DEBUG_VERBOSE (1)
