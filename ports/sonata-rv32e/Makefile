@@ -8,6 +8,7 @@ MICROPY_ROM_TEXT_COMPRESSION ?= 1
 
 # include py core make definitions
 include $(TOP)/py/py.mk
+include $(TOP)/extmod/extmod.mk
 
 ifeq ($(CROSS_GCC_INSTALL),)
     $(warning provide cross-compiler gcc binary or hardcode within makefile here. CROSS_GCC_INSTALL=<path>)
@@ -45,7 +46,8 @@ INC += $(CHERIOT_SDK_INCLUDES)
 
 DFU = $(TOP)/tools/dfu.py
 PYDFU = $(TOP)/tools/pydfu.py
-CFLAGS_RV32E = -march=rv32em_zicsr_zifencei -mabi=ilp32e -Wdouble-promotion -Wfloat-conversion
+#CFLAGS_RV32E = -march=rv32em_zicsr_zifencei -mabi=ilp32e -Wdouble-promotion -Wfloat-conversion
+CFLAGS_RV32E = -march=rv32em_zicsr_zifencei -mabi=ilp32e -Wfloat-conversion -Wno-unknown-warning-option
 CFLAGS += $(INC) -Wall -Werror -std=c99 -nostdlib $(CFLAGS_RV32E) $(COPT)
 
 
@@ -86,9 +88,11 @@ else
 endif
 
 SRC_C += shared/libc/string0.c
+SRC_C += $(SRC_LIB_LIBM_C) $(SRC_LIB_LIBM_SQRT_SW_C)
 SRC_QSTR += shared/readline/readline.c shared/runtime/pyexec.c
 
-OBJ += $(PY_CORE_O)
+
+OBJ += $(PY_O)
 OBJ += $(addprefix $(BUILD)/, $(SRC_S:.S=.o))
 OBJ += $(addprefix $(BUILD)/, $(SRC_CXX:.cpp=.o))
 OBJ += $(addprefix $(BUILD)/, $(SRC_C:.c=.o))

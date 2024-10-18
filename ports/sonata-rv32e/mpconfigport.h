@@ -17,6 +17,12 @@
 #define MICROPY_REPL_EVENT_DRIVEN         (0)
 #define MICROPY_ENABLE_EXTERNAL_IMPORT    (1)
 #define MICROPY_REPL_INFO                 (1)
+#define MICROPY_PY_MATH                   (1)
+#define MICROPY_PY_CMATH                  (1)
+#define MICROPY_FLOAT_IMPL                (MICROPY_FLOAT_IMPL_FLOAT)
+#define MICROPY_PY_RANDOM                 (1)
+#define MICROPY_PY_RANDOM_EXTRA_FUNCS     (1)
+
 
 #define MICROPY_ALLOC_PATH_MAX            (256)
 

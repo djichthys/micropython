@@ -26,7 +26,7 @@
 
 #include "libm.h"
 
-typedef float float_t;
+// typedef float float_t;   DEJICE - get rid of -Wtypedef-redefinition
 typedef union {
     float f;
     struct {
