@@ -15,3 +15,22 @@ static inline mp_uint_t mp_hal_cycles_per_ms(void)
 {
   return CPU_TIMER_HZ / 1000;
 }
+
+
+
+
+static inline void djhal_timer_reset()
+{
+  reset_mcycle(); 
+}
+
+static inline uint64_t  djhal_ticks_ms(void)
+{
+  return rdcycle64();
+}
+
+
+static inline uint64_t djhal_cycles_per_ms(void)
+{
+  return CPU_TIMER_HZ / 1000;
+}

@@ -1,6 +1,8 @@
 # Copyright (c) 2019 Project Nayuki. (MIT License)
 # https://www.nayuki.io/page/free-small-fft-in-multiple-languages
 
+    print(f"vector size = {len(vector)} , exptable size = {len(vector)}")
+                print(f"j+hsz = {j+halfsize} , k = {k}")
 import math, cmath
 
 
@@ -20,14 +22,14 @@ def transform_radix2(vector, inverse):
     vector = [vector[reverse(i, levels)] for i in range(n)]  # Copy with bit-reversed permutation
     # Radix-2 decimation-in-time FFT
     size = 2
-    print(f"vector size = {len(vector)} , exptable size = {len(vector)}")
+    print("vector size = " + str(len(vector))  + " , exptable size = " + str(len(vector)))
     while size <= n:
         halfsize = size // 2
         tablestep = n // size
         for i in range(0, n, size):
             k = 0
             for j in range(i, i + halfsize):
-                print(f"j+hsz = {j+halfsize} , k = {k}")
+                print("j+hsz = " + str(j+halfsize) + " , k = " + str(k))
                 temp = vector[j + halfsize] * exptable[k]
                 vector[j + halfsize] = vector[j] - temp
                 vector[j] += temp

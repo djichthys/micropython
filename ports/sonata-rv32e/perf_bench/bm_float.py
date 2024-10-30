@@ -8,15 +8,12 @@ from math import sin, cos, sqrt
 
 class Point(object):
     __slots__ = ("x", "y", "z")
-
     def __init__(self, i):
         self.x = x = sin(i)
         self.y = cos(i) * 3
         self.z = (x * x) / 2
-
     def __repr__(self):
         return "<Point: x=%s, y=%s, z=%s>" % (self.x, self.y, self.z)
-
     def normalize(self):
         x = self.x
         y = self.y
@@ -25,7 +22,6 @@ class Point(object):
         self.x /= norm
         self.y /= norm
         self.z /= norm
-
     def maximize(self, other):
         self.x = self.x if self.x > other.x else other.x
         self.y = self.y if self.y > other.y else other.y
@@ -38,7 +34,6 @@ def maximize(points):
     for p in points[1:]:
         next = next.maximize(p)
     return next
-
 
 def benchmark(n):
     points = [None] * n
@@ -62,13 +57,10 @@ bm_params = {
 
 def bm_setup(params):
     state = None
-
     def run():
         nonlocal state
         for _ in range(params[0]):
             state = benchmark(params[1])
-
     def result():
         return params[0] * params[1], "Point(%.4f, %.4f, %.4f)" % (state.x, state.y, state.z)
-
     return run, result

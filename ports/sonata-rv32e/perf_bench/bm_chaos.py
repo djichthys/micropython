@@ -13,53 +13,34 @@ class GVector(object):
         self.x = x
         self.y = y
         self.z = z
-
     def Mag(self):
         return math.sqrt(self.x**2 + self.y**2 + self.z**2)
-
     def dist(self, other):
-        return math.sqrt(
-            (self.x - other.x) ** 2 + (self.y - other.y) ** 2 + (self.z - other.z) ** 2
-        )
-
+        return math.sqrt( (self.x - other.x) ** 2 + (self.y - other.y) ** 2 + (self.z - other.z) ** 2)
     def __add__(self, other):
         if not isinstance(other, GVector):
             raise ValueError("Can't add GVector to " + str(type(other)))
         v = GVector(self.x + other.x, self.y + other.y, self.z + other.z)
         return v
-
     def __sub__(self, other):
         return self + other * -1
-
     def __mul__(self, other):
         v = GVector(self.x * other, self.y * other, self.z * other)
         return v
-
     __rmul__ = __mul__
-
     def linear_combination(self, other, l1, l2=None):
         if l2 is None:
             l2 = 1 - l1
-        v = GVector(
-            self.x * l1 + other.x * l2, self.y * l1 + other.y * l2, self.z * l1 + other.z * l2
-        )
+        v = GVector( self.x * l1 + other.x * l2, self.y * l1 + other.y * l2, self.z * l1 + other.z * l2)
         return v
-
     def __str__(self):
         return "<%f, %f, %f>" % (self.x, self.y, self.z)
-
     def __repr__(self):
         return "GVector(%f, %f, %f)" % (self.x, self.y, self.z)
 
 
 class Spline(object):
-    """Class for representing B-Splines and NURBS of arbitrary degree"""
-
     def __init__(self, points, degree, knots):
-        """Creates a Spline.
-
-        points is a list of GVector, degree is the degree of the Spline.
-        """
         if len(points) > len(knots) - degree + 1:
             raise ValueError("too many control points")
         elif len(points) < len(knots) - degree + 1:
@@ -72,13 +53,9 @@ class Spline(object):
         self.knots = knots
         self.points = points
         self.degree = degree
-
     def GetDomain(self):
-        """Returns the domain of the B-Spline"""
         return (self.knots[self.degree - 1], self.knots[len(self.knots) - self.degree])
-
     def __call__(self, u):
-        """Calculates a point of the B-Spline using de Boors Algorithm"""
         dom = self.GetDomain()
         if u < dom[0] or u > dom[1]:
             raise ValueError("Function value not in domain")
@@ -98,7 +75,6 @@ class Spline(object):
                 index = ii - I + self.degree - ik - 1
                 d[index] = d[index].linear_combination(d[index + 1], co1, co2)
         return d[0]
-
     def GetIndex(self, u):
         dom = self.GetDomain()
         for ii in range(self.degree - 1, len(self.knots) - self.degree):
@@ -108,10 +84,8 @@ class Spline(object):
         else:
             I = dom[1] - 1
         return I
-
     def __len__(self):
         return len(self.points)
-
     def __repr__(self):
         return "Spline(%r, %r, %r)" % (self.points, self.degree, self.knots)
 
@@ -148,7 +122,6 @@ class Chaosgame(object):
                 length += curr.dist(last)
             self.num_trafos.append(max(1, int(length / maxlength * 1.5)))
         self.num_total = sum(self.num_trafos)
-
     def get_random_trafo(self):
         r = random.randrange(int(self.num_total) + 1)
         l = 0
@@ -157,7 +130,6 @@ class Chaosgame(object):
                 return i, random.randrange(self.num_trafos[i])
             l += self.num_trafos[i]
         return len(self.num_trafos) - 1, random.randrange(self.num_trafos[-1])
-
     def transform_point(self, point, trafo=None):
         x = (point.x - self.minx) / self.width
         y = (point.y - self.miny) / self.height
@@ -182,7 +154,6 @@ class Chaosgame(object):
             pass
         self.truncate(basepoint)
         return basepoint
-
     def truncate(self, point):
         if point.x >= self.maxx:
             point.x = self.maxx
@@ -192,12 +163,10 @@ class Chaosgame(object):
             point.x = self.minx
         if point.y < self.miny:
             point.y = self.miny
-
     def create_image_chaos(self, w, h, iterations, rng_seed):
         # Always use the same sequence of random numbers
         # to get reproductible benchmark
         random.seed(rng_seed)
-
         im = bytearray(w * h)
         point = GVector((self.maxx + self.minx) / 2, (self.maxy + self.miny) / 2, 0)
         for _ in range(iterations):
@@ -211,7 +180,6 @@ class Chaosgame(object):
             if y == h:
                 y -= 1
             im[(h - y - 1) * w + x] = 1
-
         return im
 
 

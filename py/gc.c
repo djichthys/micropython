@@ -1135,6 +1135,7 @@ void *gc_realloc(void *ptr_in, size_t n_bytes, bool allow_move) {
 void gc_dump_info(const mp_print_t *print) {
     gc_info_t info;
     gc_info(&info);
+    #if 0 //Dejice remove for benchmarking
     mp_printf(print, "GC: total: %u, used: %u, free: %u",
         (uint)info.total, (uint)info.used, (uint)info.free);
     #if MICROPY_GC_SPLIT_HEAP_AUTO
@@ -1142,6 +1143,7 @@ void gc_dump_info(const mp_print_t *print) {
     #endif
     mp_printf(print, "\n No. of 1-blocks: %u, 2-blocks: %u, max blk sz: %u, max free sz: %u\n",
         (uint)info.num_1block, (uint)info.num_2block, (uint)info.max_block, (uint)info.max_free);
+    #endif // Dejice
 }
 
 void gc_dump_alloc_table(const mp_print_t *print) {

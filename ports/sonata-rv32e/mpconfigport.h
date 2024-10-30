@@ -22,6 +22,12 @@
 #define MICROPY_FLOAT_IMPL                (MICROPY_FLOAT_IMPL_FLOAT)
 #define MICROPY_PY_RANDOM                 (1)
 #define MICROPY_PY_RANDOM_EXTRA_FUNCS     (1)
+#define MICROPY_PY_BUILTINS_SLICE         (1)
+#define MICROPY_PY_BUILTINS_BYTEARRAY     (1)
+#define MICROPY_PY_BUILTINS_MEMORYVIEW    (1)
+#define MICROPY_PY_BUILTINS_REVERSED      (1)
+#define MICROPY_PY_BUILTINS_SET           (1)
+#define MICROPY_LONGINT_IMPL              (MICROPY_LONGINT_IMPL_MPZ)
 
 
 #define MICROPY_ALLOC_PATH_MAX            (256)
@@ -53,4 +59,3 @@ typedef long mp_off_t;
 #endif
 
 #define MP_STATE_PORT MP_STATE_VM
-//#define MICROPY_DEBUG_VERBOSE (1)

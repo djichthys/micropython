@@ -53,6 +53,7 @@ mp_import_stat_t mp_import_stat(const char *path) {
     return MP_IMPORT_STAT_NO_EXIST;
 }
 
+int timertest_main(void *);
 int main(int argc, char **argv) 
 {
     /* Init UART */
@@ -62,7 +63,6 @@ int main(int argc, char **argv)
     gc_init(heap, heap + sizeof(heap));
     #endif
     mp_init();
-
 
     #if MICROPY_ENABLE_COMPILER
     #if MICROPY_REPL_EVENT_DRIVEN
@@ -103,5 +103,3 @@ void mpy_start()
     __asm__("wfi");   /* Infinite loop */
   }
 }
-
-

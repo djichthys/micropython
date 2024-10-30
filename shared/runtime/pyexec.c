@@ -66,7 +66,8 @@ static bool repl_display_debugging_info = 0;
 static int parse_compile_execute(const void *source, mp_parse_input_kind_t input_kind, mp_uint_t exec_flags) {
     int ret = 0;
     #if MICROPY_REPL_INFO
-    uint32_t start = 0;
+    // uint32_t start = 0;
+    uint64_t start = 0;
     #endif
 
     #ifdef MICROPY_BOARD_BEFORE_PYTHON_EXEC
@@ -114,7 +115,9 @@ static int parse_compile_execute(const void *source, mp_parse_input_kind_t input
             mp_hal_set_interrupt_char(CHAR_CTRL_C);
         }
         #if MICROPY_REPL_INFO
-        start = mp_hal_ticks_ms();
+	djhal_timer_reset();  
+        start = djhal_ticks_ms();
+        //start = mp_hal_ticks_ms();   // DEJICE
         #endif
         mp_call_function_0(module_fun);
         mp_hal_set_interrupt_char(-1); // disable interrupt
@@ -150,8 +153,9 @@ static int parse_compile_execute(const void *source, mp_parse_input_kind_t input
     }
 
     #if MICROPY_REPL_INFO
-    mp_uint_t ticksd = mp_hal_ticks_ms() - start; // TODO implement a function that does this properly
-    mp_printf(&mp_plat_print, "took " UINT_FMT " ms\n\r", ticksd / mp_hal_cycles_per_ms());
+    uint64_t  ticksd = djhal_ticks_ms() - start; // TODO implement a function that does this properly
+    uint64_t  time_ms = ticksd / mp_hal_cycles_per_ms();
+    mp_printf(&mp_plat_print, "took " "%lu - %lu" " ms\n\r", (uint32_t)(time_ms >> 32), (uint32_t)(time_ms & (uint64_t)0xffffffff)); 
     // display debugging info if wanted
     if ((exec_flags & EXEC_FLAG_ALLOW_DEBUGGING) && repl_display_debugging_info) {
         mp_uint_t ticks = mp_hal_ticks_ms() - start; // TODO implement a function that does this properly

@@ -45,3 +45,9 @@ To test out this feature, change the `MICROPY_ENABLE_COMPILER` config
 option to "0" in the mpconfigport.h file in this directory.  Then
 recompile and run the firmware and it will execute the frozentest.py
 file.
+
+
+### Command to get program building for timed interpreter runs
+```
+make CROSS_GCC_INSTALL=/home/dejice/work/riscv/toolchain-bin CROSS_LLVM_INSTALL=/home/dejice/work/riscv/llvm-install UF2_UTILS=/home/dejice/work/cap-vm/cheriot/uf2 clean all
+```

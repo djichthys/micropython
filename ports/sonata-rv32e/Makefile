@@ -31,18 +31,11 @@ CROSS_GCC_VERSION:=$(shell $(CROSS_GCC_INSTALL)/bin/riscv32-unknown-elf-gcc --ve
 INC += -I.
 INC += -I$(TOP)
 INC += -I$(BUILD)
-
-#####################
-#####################
-#####################
 INC += -I$(HOME)/work/cap-vm/cheriot/riscv-experiment/sonata-rv32e/src/include
 
 CHERIOT_RTOS_INCLUDE_PATH ?= $(HOME)/work/cap-vm/cheriot/cheriot-rtos/sdk/include
 CHERIOT_SDK_INCLUDES = $(foreach dir, c++-config libc++ platform/generic-riscv, -I$(CHERIOT_RTOS_INCLUDE_PATH)/$(dir))
 INC += $(CHERIOT_SDK_INCLUDES)
-
-###################
-#####################
 
 DFU = $(TOP)/tools/dfu.py
 PYDFU = $(TOP)/tools/pydfu.py
@@ -84,7 +77,7 @@ ifeq ($(QEMU_RV32),1)
   LDFLAGS += -nostdlib -T rv32e-upy.ld -Map=$@.map --cref --gc-sections
 else
   LDFLAGS += -nostdlib -T sonatarv32e.ld -Map=$@.map --cref --gc-sections
-#  SRC_CXX += led.cpp
+#  SRC_CXX += timer_test.cpp
 endif
 
 SRC_C += shared/libc/string0.c
@@ -101,7 +94,7 @@ all: $(BUILD)/firmware.elf.uf2
 
 $(BUILD)/_frozen_mpy.c: $(TOP)/tests/frozen/frozentest.mpy $(BUILD)/genhdr/qstrdefs.generated.h
 	$(ECHO) "MISC freezing bytecode"
-	$(Q)$(TOP)/tools/mpy-tool.py -f -q $(BUILD)/genhdr/qstrdefs.preprocessed.h -mlongint-impl=none $< > $@
+	$(Q)$(TOP)/tools/mpy-tool.py -f -q $(BUILD)/genhdr/qstrdefs.preprocessed.h -mlongint-impl=mpz $< > $@
 
 $(BUILD)/firmware.elf: $(OBJ)
 	$(ECHO) "LINK $@"
