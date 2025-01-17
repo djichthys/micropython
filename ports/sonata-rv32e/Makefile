@@ -18,6 +18,12 @@ ifeq ($(CROSS_LLVM_INSTALL),)
     $(warning provide cross-compiler gcc binary or hardcode within makefile here. CROSS_LLVM_INSTALL=<path>)
     CROSS_COMPILE ?= riscv32-unknown-elf-
 endif
+ifeq ($(SONATA_RV32E_HEADERS),)
+    $(warning provide SONATA_RV32_HEADERS=<path>)
+endif
+ifeq ($(CHERIOT_RTOS_INCLUDE_PATH),)
+    $(warning provide CHERIOT_RTOS_INCLUDE_PATH=<path>)
+endif
 
 CROSS_COMPILE ?= $(CROSS_LLVM_INSTALL)/bin/
 ifeq ($(UF2_UTILS),)
@@ -31,9 +37,9 @@ CROSS_GCC_VERSION:=$(shell $(CROSS_GCC_INSTALL)/bin/riscv32-unknown-elf-gcc --ve
 INC += -I.
 INC += -I$(TOP)
 INC += -I$(BUILD)
-INC += -I$(HOME)/work/cap-vm/cheriot/riscv-experiment/sonata-rv32e/src/include
+#INC += -I$(HOME)/work/cap-vm/cheriot/riscv-experiment/sonata-rv32e/src/include
+INC += -I$(SONATA_RV32E_HEADERS)/src/include
 
-CHERIOT_RTOS_INCLUDE_PATH ?= $(HOME)/work/cap-vm/cheriot/cheriot-rtos/sdk/include
 CHERIOT_SDK_INCLUDES = $(foreach dir, c++-config libc++ platform/generic-riscv, -I$(CHERIOT_RTOS_INCLUDE_PATH)/$(dir))
 INC += $(CHERIOT_SDK_INCLUDES)
 
