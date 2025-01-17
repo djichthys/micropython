@@ -20,32 +20,86 @@ bm_params = {
                 (1000, 1000): (20, 512),
                 (5000, 1000): (100, 512),
             }, 
-  "bm_nqueens": 
-
-
-
-
-              
+  "bm_nqueens": {
+                (32, 10): (1, 5),
+                (100, 25): (1, 6),
+                (1000, 100): (1, 7),
+                (5000, 100): (1, 8),
+           }, 
+  "bm_pidigts": {
+                (32, 10): (1, 20),
+                (50, 25): (1, 35),
+                (100, 100): (1, 65),
+                (1000, 1000): (2, 250),
+                (5000, 1000): (3, 350),
+           }, 
+  "bm_wordcount": {
+                (32, 10): (2,0),
+                (50, 10): (4,0),
+                (100, 10): (8,0),
+                (500, 10): (40,0),
+                (1000, 10): (80,0),
+                (5000, 10): (400,0),
+           }, 
+  "core_locals": {
+                (32, 10): (2,),
+                (50, 10): (4,),
+                (100, 10): (8,),
+                (500, 10): (40,),
+                (1000, 10): (80,),
+                (5000, 10): (400,),
+           }, 
+  "core_qstr": {
+                (32, 10): (400,),
+                (1000, 10): (4000,),
+                (5000, 10): (40000,),
+           }, 
+  "core_str": {
+                (32, 10): (2,0),
+                (50, 10): (3,0),
+                (100, 10): (6,0),
+                (500, 10): (30,0),
+                (1000, 10): (60,0),
+                (5000, 10): (300,0),
+           }, 
+  "misc_aes": {
+                (50, 25): (1, 16),
+                (100, 100): (1, 32),
+                (1000, 1000): (4, 256),
+                (5000, 1000): (20, 256),
+           }, 
+  "misc_pystone": {
+                (50, 10): (80,),
+                (100, 10): (300,),
+                (1000, 10): (4000,),
+                (5000, 10): (20000,),
+           }
 }
 
-def bm_run(N, M):
+# N = 50 , M = 32 chosen
+def bm_run(N, M, bm):
     # Pick sensible parameters given N, M
     cur_nm = (0, 0)
     param = None
-    for nm, p in bm_params.items():
+    for nm, p in bm_params[bm].items():
         if 10 * nm[0] <= 12 * N and nm[1] <= M and nm > cur_nm:
             cur_nm = nm
             param = p
     if param is None:
         print(-1, -1, "SKIP: no matching params")
         return
+    return (cur_nm, param)
     # Run and time benchmark
-    run, result = bm_setup(param)
-    run()
-    norm, out = result()
-    print(norm, out)
+    #run, result = bm_setup(param)
+    #run()
+    #norm, out = result()
+    #print(norm, out)
+
 
 
 if __name__ == '__main__': 
     for bm in bm_params.keys(): 
-      pr
+      print(f"choose {bm} --> {bm_run(50,32, bm)}")
+
+
+
