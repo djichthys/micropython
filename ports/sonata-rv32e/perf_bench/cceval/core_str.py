@@ -40,23 +40,5 @@ def test(niter):
 
 ###########################################################################
 # Benchmark interface
-
-bm_params = {
-    (32, 10): (2,0),
-    (50, 10): (3,0),
-    (100, 10): (6,0),
-    (500, 10): (30,0),
-    (1000, 10): (60,0),
-    (5000, 10): (300,0),
-}
-
-
-def bm_setup(params):
-    (niter, _ ) = params
-    state = None
-    def run():
-        nonlocal state
-        state = test(niter)
-    def result():
-        return niter, state
-    return run, result
+# bm_params chosen: (50, 10): (3,0),
+# execute : test(3)
