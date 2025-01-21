@@ -1,0 +1,268 @@
+diff --git a/lib/builtins/addsf3.c b/lib/builtins/addsf3.c
+index 9f1d517..433f3d5 100644
+--- a/lib/builtins/addsf3.c
++++ b/lib/builtins/addsf3.c
+@@ -13,6 +13,7 @@
+ #define SINGLE_PRECISION
+ #include "fp_add_impl.inc"
+ 
++COMPILER_RT_ABI float __addsf3(float a, float b) __asm__("__addsf3");
+ COMPILER_RT_ABI float __addsf3(float a, float b) { return __addXf3__(a, b); }
+ 
+ #if defined(__ARM_EABI__)
+diff --git a/lib/builtins/comparesf2.c b/lib/builtins/comparesf2.c
+index 1cb99e4..c1c06ae 100644
+--- a/lib/builtins/comparesf2.c
++++ b/lib/builtins/comparesf2.c
+@@ -41,6 +41,7 @@
+ 
+ enum LE_RESULT { LE_LESS = -1, LE_EQUAL = 0, LE_GREATER = 1, LE_UNORDERED = 1 };
+ 
++COMPILER_RT_ABI enum LE_RESULT __lesf2(fp_t a, fp_t b) __asm__("__lesf2");
+ COMPILER_RT_ABI enum LE_RESULT __lesf2(fp_t a, fp_t b) {
+ 
+   const srep_t aInt = toRep(a);
+@@ -81,6 +82,14 @@ COMPILER_RT_ABI enum LE_RESULT __lesf2(fp_t a, fp_t b) {
+   }
+ }
+ 
++#ifdef SUNBURST
++COMPILER_RT_ABI enum LE_RESULT __eqsf2(fp_t a, fp_t b) __asm__("__eqsf2");
++COMPILER_RT_ABI enum LE_RESULT __eqsf2(fp_t a, fp_t b) { return __lesf2(a, b); }
++COMPILER_RT_ABI enum LE_RESULT __ltsf2(fp_t a, fp_t b) __asm__("__ltsf2");
++COMPILER_RT_ABI enum LE_RESULT __ltsf2(fp_t a, fp_t b) { return __lesf2(a, b); }
++COMPILER_RT_ABI enum LE_RESULT __nesf2(fp_t a, fp_t b) __asm__("__nesf2");
++COMPILER_RT_ABI enum LE_RESULT __nesf2(fp_t a, fp_t b) { return __lesf2(a, b); }
++#else
+ #if defined(__ELF__)
+ // Alias for libgcc compatibility
+ COMPILER_RT_ALIAS(__lesf2, __cmpsf2)
+@@ -88,6 +97,7 @@ COMPILER_RT_ALIAS(__lesf2, __cmpsf2)
+ COMPILER_RT_ALIAS(__lesf2, __eqsf2)
+ COMPILER_RT_ALIAS(__lesf2, __ltsf2)
+ COMPILER_RT_ALIAS(__lesf2, __nesf2)
++#endif
+ 
+ enum GE_RESULT {
+   GE_LESS = -1,
+@@ -96,6 +106,7 @@ enum GE_RESULT {
+   GE_UNORDERED = -1 // Note: different from LE_UNORDERED
+ };
+ 
++COMPILER_RT_ABI enum GE_RESULT __gesf2(fp_t a, fp_t b) __asm__("__gesf2");
+ COMPILER_RT_ABI enum GE_RESULT __gesf2(fp_t a, fp_t b) {
+ 
+   const srep_t aInt = toRep(a);
+@@ -124,8 +135,14 @@ COMPILER_RT_ABI enum GE_RESULT __gesf2(fp_t a, fp_t b) {
+   }
+ }
+ 
++#ifdef SUNBURST
++COMPILER_RT_ABI enum GE_RESULT __gtsf2(fp_t a, fp_t b) __asm__("__gtsf2");
++COMPILER_RT_ABI enum GE_RESULT __gtsf2(fp_t a, fp_t b) { return __gesf2(a, b); }
++#else
+ COMPILER_RT_ALIAS(__gesf2, __gtsf2)
++#endif
+ 
++COMPILER_RT_ABI int __unordsf2(fp_t a, fp_t b) __asm__("__unordsf2");
+ COMPILER_RT_ABI int
+ __unordsf2(fp_t a, fp_t b) {
+     const rep_t aAbs = toRep(a) & absMask;
+diff --git a/lib/builtins/divsf3.c b/lib/builtins/divsf3.c
+index 593f93b..b7b2a20 100644
+--- a/lib/builtins/divsf3.c
++++ b/lib/builtins/divsf3.c
+@@ -18,6 +18,7 @@
+ #define SINGLE_PRECISION
+ #include "fp_lib.h"
+ 
++COMPILER_RT_ABI fp_t __divsf3(fp_t a, fp_t b) __asm__("__divsf3");
+ COMPILER_RT_ABI fp_t __divsf3(fp_t a, fp_t b) {
+ 
+   const unsigned int aExponent = toRep(a) >> significandBits & maxExponent;
+diff --git a/lib/builtins/extendhfsf2.c b/lib/builtins/extendhfsf2.c
+index 7c1a76e..86814bc 100644
+--- a/lib/builtins/extendhfsf2.c
++++ b/lib/builtins/extendhfsf2.c
+@@ -16,6 +16,7 @@ COMPILER_RT_ABI NOINLINE float __extendhfsf2(uint16_t a) {
+   return __extendXfYf2__(a);
+ }
+ 
++COMPILER_RT_ABI float __gnu_h2f_ieee(uint16_t a) __asm__("__gnu_h2f_ieee");
+ COMPILER_RT_ABI float __gnu_h2f_ieee(uint16_t a) { return __extendhfsf2(a); }
+ 
+ #if defined(__ARM_EABI__)
+diff --git a/lib/builtins/extendsfdf2.c b/lib/builtins/extendsfdf2.c
+index 8132d57..5de004b 100644
+--- a/lib/builtins/extendsfdf2.c
++++ b/lib/builtins/extendsfdf2.c
+@@ -10,6 +10,7 @@
+ #define DST_DOUBLE
+ #include "fp_extend_impl.inc"
+ 
++COMPILER_RT_ABI double __extendsfdf2(float a) __asm__("__extendsfdf2");
+ COMPILER_RT_ABI double __extendsfdf2(float a) { return __extendXfYf2__(a); }
+ 
+ #if defined(__ARM_EABI__)
+diff --git a/lib/builtins/fixsfsi.c b/lib/builtins/fixsfsi.c
+index d83d7e7..bff2e92 100644
+--- a/lib/builtins/fixsfsi.c
++++ b/lib/builtins/fixsfsi.c
+@@ -12,6 +12,7 @@ typedef si_int fixint_t;
+ typedef su_int fixuint_t;
+ #include "fp_fixint_impl.inc"
+ 
++COMPILER_RT_ABI si_int __fixsfsi(fp_t a) __asm__("__fixsfsi");
+ COMPILER_RT_ABI si_int __fixsfsi(fp_t a) { return __fixint(a); }
+ 
+ #if defined(__ARM_EABI__)
+diff --git a/lib/builtins/fixunssfsi.c b/lib/builtins/fixunssfsi.c
+index 738c1bb..3c7667c 100644
+--- a/lib/builtins/fixunssfsi.c
++++ b/lib/builtins/fixunssfsi.c
+@@ -15,6 +15,7 @@
+ typedef su_int fixuint_t;
+ #include "fp_fixuint_impl.inc"
+ 
++COMPILER_RT_ABI su_int __fixunssfsi(fp_t a) __asm__("__fixunssfsi");
+ COMPILER_RT_ABI su_int __fixunssfsi(fp_t a) { return __fixuint(a); }
+ 
+ #if defined(__ARM_EABI__)
+diff --git a/lib/builtins/floatsidf.c b/lib/builtins/floatsidf.c
+index 2c66167..662caa7 100644
+--- a/lib/builtins/floatsidf.c
++++ b/lib/builtins/floatsidf.c
+@@ -17,6 +17,7 @@
+ 
+ #include "int_lib.h"
+ 
++COMPILER_RT_ABI fp_t __floatsidf(int a) __asm__("__floatsidf");
+ COMPILER_RT_ABI fp_t __floatsidf(int a) {
+ 
+   const int aWidth = sizeof a * CHAR_BIT;
+diff --git a/lib/builtins/floatsisf.c b/lib/builtins/floatsisf.c
+index fe06040..7c434b0 100644
+--- a/lib/builtins/floatsisf.c
++++ b/lib/builtins/floatsisf.c
+@@ -17,6 +17,7 @@
+ 
+ #include "int_lib.h"
+ 
++COMPILER_RT_ABI fp_t __floatsisf(int a) __asm__("__floatsisf");
+ COMPILER_RT_ABI fp_t __floatsisf(int a) {
+ 
+   const int aWidth = sizeof a * CHAR_BIT;
+diff --git a/lib/builtins/floatunsisf.c b/lib/builtins/floatunsisf.c
+index 33a1b5a..f37c084 100644
+--- a/lib/builtins/floatunsisf.c
++++ b/lib/builtins/floatunsisf.c
+@@ -17,6 +17,7 @@
+ 
+ #include "int_lib.h"
+ 
++COMPILER_RT_ABI fp_t __floatunsisf(unsigned int a) __asm__("__floatunsisf");
+ COMPILER_RT_ABI fp_t __floatunsisf(unsigned int a) {
+ 
+   const int aWidth = sizeof a * CHAR_BIT;
+diff --git a/lib/builtins/fp_lib.h b/lib/builtins/fp_lib.h
+index e2a9066..146a664 100644
+--- a/lib/builtins/fp_lib.h
++++ b/lib/builtins/fp_lib.h
+@@ -54,7 +54,7 @@ static __inline void wideMultiply(rep_t a, rep_t b, rep_t *hi, rep_t *lo) {
+   *hi = product >> 32;
+   *lo = product;
+ }
+-COMPILER_RT_ABI fp_t __addsf3(fp_t a, fp_t b);
++COMPILER_RT_ABI fp_t __addsf3(fp_t a, fp_t b) __asm__("__addsf3");
+ 
+ #elif defined DOUBLE_PRECISION
+ 
+diff --git a/lib/builtins/int_lib.h b/lib/builtins/int_lib.h
+index 3092f68..ca3ea5f 100644
+--- a/lib/builtins/int_lib.h
++++ b/lib/builtins/int_lib.h
+@@ -26,8 +26,9 @@
+ #else
+ #define COMPILER_RT_ABI __attribute__((__pcs__("aapcs")))
+ #endif
+-#else
+-#define COMPILER_RT_ABI
++#elif SUNBURST
++#include <cdefs.h>
++#define COMPILER_RT_ABI __cheri_libcall
+ #endif
+ 
+ #define AEABI_RTABI __attribute__((__pcs__("aapcs")))
+@@ -72,7 +73,9 @@
+ #include <sys/types.h>
+ #else
+ // Include the standard compiler builtin headers we use functionality from.
++#ifndef SUNBURST
+ #include <float.h>
++#endif
+ #include <limits.h>
+ #include <stdbool.h>
+ #include <stdint.h>
+diff --git a/lib/builtins/mulsf3.c b/lib/builtins/mulsf3.c
+index b9cf39a..c5d8985 100644
+--- a/lib/builtins/mulsf3.c
++++ b/lib/builtins/mulsf3.c
+@@ -14,6 +14,7 @@
+ #define SINGLE_PRECISION
+ #include "fp_mul_impl.inc"
+ 
++COMPILER_RT_ABI fp_t __mulsf3(fp_t a, fp_t b) __asm__("__mulsf3");
+ COMPILER_RT_ABI fp_t __mulsf3(fp_t a, fp_t b) { return __mulXf3__(a, b); }
+ 
+ #if defined(__ARM_EABI__)
+diff --git a/lib/builtins/subsf3.c b/lib/builtins/subsf3.c
+index ecfc24f..c89b452 100644
+--- a/lib/builtins/subsf3.c
++++ b/lib/builtins/subsf3.c
+@@ -14,6 +14,7 @@
+ #include "fp_lib.h"
+ 
+ // Subtraction; flip the sign bit of b and add.
++COMPILER_RT_ABI fp_t __subsf3(fp_t a, fp_t b) __asm__("__subsf3");
+ COMPILER_RT_ABI fp_t __subsf3(fp_t a, fp_t b) {
+   return __addsf3(a, fromRep(toRep(b) ^ signBit));
+ }
+diff --git a/lib/builtins/truncdfsf2.c b/lib/builtins/truncdfsf2.c
+index 44a1299..f83a0ac 100644
+--- a/lib/builtins/truncdfsf2.c
++++ b/lib/builtins/truncdfsf2.c
+@@ -10,6 +10,7 @@
+ #define DST_SINGLE
+ #include "fp_trunc_impl.inc"
+ 
++COMPILER_RT_ABI float __truncdfsf2(double a) __asm__("__truncdfsf2");
+ COMPILER_RT_ABI float __truncdfsf2(double a) { return __truncXfYf2__(a); }
+ 
+ #if defined(__ARM_EABI__)
+diff --git a/lib/builtins/truncsfhf2.c b/lib/builtins/truncsfhf2.c
+index 1f17194..08d6c40 100644
+--- a/lib/builtins/truncsfhf2.c
++++ b/lib/builtins/truncsfhf2.c
+@@ -16,6 +16,7 @@ COMPILER_RT_ABI NOINLINE uint16_t __truncsfhf2(float a) {
+   return __truncXfYf2__(a);
+ }
+ 
++COMPILER_RT_ABI uint16_t __gnu_f2h_ieee(float a) __asm__("__gnu_f2h_ieee");
+ COMPILER_RT_ABI uint16_t __gnu_f2h_ieee(float a) { return __truncsfhf2(a); }
+ 
+ #if defined(__ARM_EABI__)
+diff --git a/lib/builtins/xmake.lua b/lib/builtins/xmake.lua
+new file mode 100644
+index 0000000..622ff9b
+--- /dev/null
++++ b/lib/builtins/xmake.lua
+@@ -0,0 +1,9 @@
++library("soft_fp")
++  add_files("truncdfsf2.c", "extendsfdf2.c")
++  add_files("addsf3.c", "divsf3.c", "mulsf3.c", "subsf3.c")
++  add_files("floatsisf.c", "fixsfsi.c", "floatunsisf.c")
++  add_files("comparesf2.c")
++  add_files("extendhfsf2.c", "truncsfhf2.c")
++  add_files("floatsidf.c", "fixunssfsi.c")
++  add_files("fp_mode.c")
++
