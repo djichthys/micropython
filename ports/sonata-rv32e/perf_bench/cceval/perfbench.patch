@@ -1,0 +1,25 @@
+diff --git a/tests/run-perfbench.py b/tests/run-perfbench.py
+index 81d873c..f3a560c 100755
+--- a/tests/run-perfbench.py
++++ b/tests/run-perfbench.py
+@@ -109,7 +109,7 @@ def run_benchmarks(args, target, param_n, param_m, n_average, test_list):
+             continue
+ 
+         # Create test script
+-        test_script = b"import sys\nsys.path.remove('')\n\n"
++        test_script = b""# b"import sys\nsys.path.remove('')\n\n"
+         with open(test_file, "rb") as f:
+             test_script += f.read()
+         with open(BENCH_SCRIPT_DIR + "benchrun.py", "rb") as f:
+diff --git a/tools/pyboard.py b/tools/pyboard.py
+index c422b64..66ab393 100755
+--- a/tools/pyboard.py
++++ b/tools/pyboard.py
+@@ -447,6 +447,7 @@ class Pyboard:
+         if not data.endswith(b">"):
+             raise PyboardError("could not enter raw repl")
+ 
++        self.use_raw_paste = False
+         if self.use_raw_paste:
+             # Try to enter raw-paste mode.
+             self.serial.write(b"\x05A\x01")
